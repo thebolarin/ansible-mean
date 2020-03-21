@@ -1,0 +1,33 @@
+---
+- hosts: 192.168.33.30
+  become: yes
+  vars:
+    - newport: 80
+  handlers:
+    - name: restart Apache
+      service: name=apache2 state=restarted
+  tasks:
+    - name: Install Apache
+      apt:
+        name: apache2
+        state: present
+    - name: Start and enable Apache
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+    - name: Change the default port for Apache in ports.conf
+      lineinfile:
+        path: /etc/apache2/ports.conf
+        regexp: '^Listen \d+'
+        line: 'Listen {{ newport }}'
+      notify:
+        - restart Apache
+    - name: Change the default port in the defaults.conf file
+      lineinfile:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        regexp: '^\<VirtualHost \*\:\d+\>'
+        line: '<VirtualHost *:{{ newport }}>'
+      notify:
+        - restart Apache
+

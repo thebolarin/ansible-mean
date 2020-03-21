@@ -1,0 +1,14 @@
+[Unit]
+Description=Node.js application server
+
+[Service]
+ExecStart={{ appdir }}/server.js
+Restart=always
+User=nobody
+# Note RHEL/Fedora uses 'nobody', Debian/Ubuntu uses 'nogroup'
+Group=nobody  
+Environment=PATH=/usr/bin:/usr/local/bin
+WorkingDirectory={{ appdir }}
+
+[Install]
+WantedBy=multi-user.target

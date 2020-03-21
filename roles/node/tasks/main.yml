@@ -1,0 +1,38 @@
+---
+# tasks file for node
+- include_vars: secrets.yml
+- name: Install the EPEL repo
+  yum: name=epel-release state=present
+- name: Install NodeJS
+  yum: name=nodejs state=present
+- name: Create the application directory
+  file:
+    path: "{{ appdir }}"
+    state: directory
+- name: Upload the server.js file
+  template:
+    src: server.js.j2
+    dest: "{{ appdir }}/server.js"
+- name: Upload the api directory and package.json file
+  copy:
+    src: "{{ item }}"
+    dest: "{{ appdir }}"
+  with_items:
+    - api
+    - package.json
+- name: Run npm against package.json
+  npm:
+    path: "{{ appdir }}"
+- name: Make server.js executable
+  file:
+    path: "{{ appdir }}/server.js"
+    mode: 0755
+- name: Install NodeJS service
+  template:
+    src: node.service.j2
+    dest: /etc/systemd/system/node.service
+- name: Start and enable Node.js
+  service:
+    name: node
+    state: started
+    enabled: yes
